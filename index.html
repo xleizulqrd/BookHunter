@@ -1,0 +1,3120 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BookHunter — Умный поиск по книгам</title>
+  <link rel="icon" href="/pictures/logo.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #2563eb;
+      --primary-light: rgba(37, 99, 235, 0.1);
+      --primary-dark: #1d4ed8;
+      --secondary: #10b981;
+      --surface: #ffffff;
+      --background: #f8fafc;
+      --sidebar-bg: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-light: #475569;
+      --text-muted: #64748b;
+      --danger: #ef4444;
+      --danger-light: rgba(239, 68, 68, 0.1);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      --sidebar-width: 320px;
+      --radius-sm: 0.375rem;
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --radius-xl: 1rem;
+      --radius-2xl: 1.5rem;
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: var(--primary) var(--border);
+    }
+
+    *::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    *::-webkit-scrollbar-track {
+      background: var(--border);
+      border-radius: 999px;
+    }
+
+    *::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 999px;
+      opacity: 0.5;
+    }
+
+    *::-webkit-scrollbar-thumb:hover {
+      background: var(--primary-dark);
+    }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: var(--background);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+      line-height: 1.5;
+      font-weight: 400;
+    }
+
+    .serif {
+      font-family: 'Merriweather', Georgia, serif;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    #app {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #sidebar {
+      width: var(--sidebar-width);
+      min-width: var(--sidebar-width);
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 50;
+      box-shadow: var(--shadow-md);
+      position: relative;
+    }
+
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(to bottom, var(--surface), var(--background));
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .brand-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.25rem;
+      box-shadow: var(--shadow-md);
+    }
+
+    .brand-name {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 0;
+    }
+
+    .btn-add {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      border: none;
+      border-radius: var(--radius-lg);
+      padding: 0.625rem 1rem;
+      font-weight: 600;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: var(--shadow-md);
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .btn-add:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+      filter: brightness(1.1);
+    }
+
+    .btn-add:active {
+      transform: translateY(0);
+    }
+
+    .login-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: center;
+      background: var(--background);
+      border-radius: var(--radius-lg);
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border);
+      font-weight: 500;
+    }
+
+    .sidebar-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      background: var(--surface);
+    }
+
+    .collection-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+      padding: 0 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .count-badge {
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.65rem;
+      font-weight: 700;
+    }
+
+    .book-search-wrap {
+      position: relative;
+      margin-bottom: 1rem;
+    }
+
+    .book-search-wrap i {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      pointer-events: none;
+      transition: var(--transition);
+    }
+
+    .book-search-input {
+      width: 100%;
+      padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      font-size: 0.875rem;
+      background: var(--background);
+      outline: none;
+      color: var(--text);
+      transition: var(--transition);
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .book-search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px var(--primary-light);
+    }
+
+    #book-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .book-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      border-radius: var(--radius-lg);
+      transition: var(--transition);
+      background: transparent;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .book-item:hover {
+      background: var(--primary-light);
+      transform: translateX(4px);
+    }
+
+    .book-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: linear-gradient(to bottom, var(--primary), var(--primary-dark));
+      border-radius: 999px;
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .book-item:hover::before {
+      opacity: 1;
+    }
+
+    .book-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      min-width: 2.5rem;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .book-info {
+      flex: 1;
+      min-width: 0;
+      cursor: pointer;
+    }
+
+    .book-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.15rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .book-meta {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-weight: 500;
+    }
+
+    .book-actions {
+      display: flex;
+      gap: 0.2rem;
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .book-item:hover .book-actions {
+      opacity: 1;
+    }
+
+    .book-action-btn {
+      width: 2rem;
+      height: 2rem;
+      border: none;
+      background: transparent;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      transition: var(--transition);
+    }
+
+    .book-action-btn:hover {
+      background: var(--surface);
+      color: var(--primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .book-action-btn.danger:hover {
+      background: var(--danger-light);
+      color: var(--danger);
+    }
+
+    .empty-books {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .empty-books i {
+      font-size: 2.5rem;
+      display: block;
+      margin-bottom: 0.5rem;
+      opacity: 0.5;
+    }
+
+    .sidebar-footer {
+      border-top: 1px solid var(--border);
+      padding: 1rem 1.25rem;
+      background: var(--surface);
+    }
+
+    .user-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .user-avatar-placeholder {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .user-name {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .btn-auth {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      border-radius: var(--radius-lg);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      border: none;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .btn-login {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-login:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn-logout {
+      background: var(--background);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-logout:hover {
+      background: var(--danger-light);
+      color: var(--danger);
+      border-color: var(--danger);
+    }
+
+    #main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      background: var(--background);
+      position: relative;
+    }
+
+    #main::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top right, var(--primary-light), transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    #empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    #empty-state img {
+      max-width: 380px;
+      width: 100%;
+      height: auto;
+      border-radius: var(--radius-2xl);
+      box-shadow: var(--shadow-xl);
+      margin-bottom: 2rem;
+      border: 1px solid var(--border);
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    #empty-state h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.75rem;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    #empty-state p {
+      color: var(--text-muted);
+      max-width: 420px;
+      margin: 0 auto 1.5rem;
+      font-size: 1rem;
+      line-height: 1.7;
+      font-weight: 500;
+    }
+
+    .hint-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--surface);
+      color: var(--primary);
+      border: 1px solid var(--primary-light);
+      border-radius: 999px;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(10px);
+    }
+
+    #tabs-area {
+      flex: 1;
+      width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 3rem;
+      position: relative;
+      z-index: 1;
+      animation: slideUp 0.5s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .tab-bar {
+      display: flex;
+      align-items: center;
+      background: var(--surface);
+      backdrop-filter: blur(20px);
+      padding: 0.5rem;
+      border-radius: var(--radius-2xl);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-lg);
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 2.5rem;
+      justify-content: center;
+    }
+
+    .tab-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.625rem 1.25rem;
+      border-radius: var(--radius-xl);
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      white-space: nowrap;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .tab-btn:hover {
+      color: var(--text);
+      background: var(--primary-light);
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      box-shadow: var(--shadow-md);
+    }
+
+    .tab-panel {
+      display: none;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .panel-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .panel-header h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.4rem;
+      background: linear-gradient(135deg, var(--text), var(--primary-dark));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .panel-header p {
+      color: var(--text-muted);
+      margin: 0;
+      font-weight: 500;
+    }
+
+    .search-bar-wrap {
+      position: relative;
+      margin-bottom: 2rem;
+    }
+
+    .search-bar-wrap .icon-left {
+      position: absolute;
+      left: 1.25rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 1.25rem;
+      pointer-events: none;
+      transition: var(--transition);
+      z-index: 1;
+    }
+
+    .search-bar-wrap:focus-within .icon-left {
+      color: var(--primary);
+    }
+
+    .main-search-input {
+      width: 100%;
+      padding: 1.25rem 10rem 1.25rem 3.5rem;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-2xl);
+      font-size: 1rem;
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+      transition: var(--transition);
+      box-shadow: var(--shadow-md);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 500;
+    }
+
+    .main-search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px var(--primary-light), var(--shadow-lg);
+    }
+
+    .main-search-input::placeholder {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .search-bar-btn {
+      position: absolute;
+      right: 0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.75rem;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      border: none;
+      border-radius: var(--radius-xl);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: var(--shadow-md);
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .search-bar-btn:hover:not(:disabled) {
+      transform: translateY(-50%) scale(1.05);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .search-bar-btn:active:not(:disabled) {
+      transform: translateY(-50%) scale(0.95);
+    }
+
+    .search-bar-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .result-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition);
+      animation: slideIn 0.4s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .result-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--primary-light);
+    }
+
+    .result-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(to bottom, var(--primary), var(--secondary));
+      border-radius: 999px;
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .result-card:hover::before {
+      opacity: 1;
+    }
+
+    .result-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .badge-score {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 0.2rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-book {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--background);
+      padding: 0.2rem 0.75rem;
+      border-radius: 999px;
+    }
+
+    .badge-location {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-left: auto;
+      font-weight: 500;
+    }
+
+    .result-text {
+      font-family: 'Merriweather', serif;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.8;
+      font-size: 0.95rem;
+      position: relative;
+      padding-left: 1rem;
+      font-weight: 400;
+    }
+
+    .result-text::before {
+      content: '"';
+      position: absolute;
+      left: 0;
+      top: -0.2rem;
+      font-size: 2rem;
+      color: var(--primary-light);
+      font-family: serif;
+    }
+
+    .answer-box {
+      background: linear-gradient(135deg, var(--surface), var(--background));
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .answer-box::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 150px;
+      height: 150px;
+      background: radial-gradient(circle, var(--primary-light), transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .answer-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .answer-text {
+      color: var(--text);
+      line-height: 1.8;
+      font-size: 1rem;
+      white-space: pre-wrap;
+      font-family: 'Merriweather', serif;
+      font-weight: 400;
+    }
+
+    .sources-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .sources-header .sep {
+      flex: 1;
+      height: 2px;
+      background: linear-gradient(90deg, var(--border), var(--primary), var(--border));
+      border-radius: 999px;
+    }
+
+    .citation-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      font-size: 0.82rem;
+      transition: var(--transition);
+      height: 100%;
+      animation: scaleIn 0.4s ease-out;
+    }
+
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .citation-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--primary);
+    }
+
+    .citation-book {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.75rem;
+      border-bottom: 1px dashed var(--border);
+      padding-bottom: 0.5rem;
+    }
+
+    .citation-book .loc {
+      color: var(--text-muted);
+      margin-left: auto;
+      font-weight: 500;
+      font-size: 0.7rem;
+    }
+
+    .citation-text {
+      font-family: 'Merriweather', serif;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.6;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      position: relative;
+      padding-left: 0.75rem;
+      font-weight: 400;
+    }
+
+    .citation-text::before {
+      content: '"';
+      position: absolute;
+      left: 0;
+      top: -0.1rem;
+      font-size: 1.2rem;
+      color: var(--primary-light);
+    }
+
+    .rec-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      border-radius: 999px;
+      padding: 0.4rem 1.25rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      box-shadow: var(--shadow-md);
+    }
+
+    .rec-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .btn-sm-outline {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.5rem 1rem;
+      border: 2px solid var(--border);
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text);
+      transition: var(--transition);
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .btn-sm-outline:hover {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .btn-sm-primary-outline {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.5rem 1rem;
+      border: 2px solid var(--primary);
+      background: var(--primary-light);
+      border-radius: var(--radius-lg);
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--primary);
+      transition: var(--transition);
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .btn-sm-primary-outline:hover:not(:disabled) {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-sm-primary-outline:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .genres-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      display: none;
+      box-shadow: var(--shadow-lg);
+      animation: slideDown 0.3s ease-out;
+    }
+
+    .genres-panel.open {
+      display: block;
+    }
+
+    #genres-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 0.5rem 0;
+    }
+
+    .genre-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.5rem 1.2rem;
+      border-radius: 999px;
+      border: 2px solid var(--border);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      background: var(--surface);
+      color: var(--text);
+      margin: 0.2rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .genre-chip:hover {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .genre-chip.selected {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      border-color: transparent;
+      box-shadow: var(--shadow-md);
+    }
+
+    .genre-chip i {
+      margin-right: 0.3rem;
+      font-size: 0.8rem;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .rec-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      box-shadow: var(--shadow-md);
+      transition: var(--transition);
+      animation: slideUp 0.4s ease-out;
+      cursor: pointer;
+    }
+
+    .rec-card:hover {
+      transform: translateY(-2px) scale(1.01);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--primary);
+    }
+
+    .rec-card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .rec-num {
+      width: 2.5rem;
+      height: 2.5rem;
+      min-width: 2.5rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      font-weight: 800;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-md);
+    }
+
+    .rec-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.2rem;
+    }
+
+    .rec-author {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-weight: 500;
+    }
+
+    .rec-genre-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      background: var(--primary-light);
+      color: var(--primary);
+      border-radius: 999px;
+      padding: 0.2rem 0.75rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      margin-right: 0.25rem;
+      margin-top: 0.25rem;
+    }
+
+    .rec-description {
+      margin: 0.5rem 0;
+      color: var(--text-light);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .rec-why {
+      font-size: 0.85rem;
+      color: var(--text-light);
+      line-height: 1.7;
+      border-top: 1px solid var(--border);
+      padding-top: 1rem;
+      margin-top: 1rem;
+      background: var(--background);
+      border-radius: var(--radius-lg);
+      padding: 1rem;
+      font-weight: 500;
+    }
+
+    .rec-why span {
+      font-weight: 700;
+      color: var(--primary);
+      display: block;
+      margin-bottom: 0.3rem;
+    }
+
+    .loading-state,
+    .empty-result {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem 1rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .loading-state i {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: var(--primary);
+    }
+
+    .empty-result i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+      color: var(--primary);
+    }
+
+    .empty-result h3 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      margin-bottom: 0.4rem;
+    }
+
+    .empty-result p {
+      font-size: 0.85rem;
+      max-width: 340px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .section-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .spin {
+      animation: spin 0.75s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .pulse {
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-2xl);
+      box-shadow: var(--shadow-xl);
+      width: 100%;
+      max-width: 480px;
+      padding: 2rem;
+      position: relative;
+      transform: scale(0.9) translateY(20px);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .overlay.show .modal-box {
+      transform: scale(1) translateY(0);
+    }
+
+    .modal-box.xl {
+      max-width: 900px;
+      width: calc(100% - 2rem);
+      height: 85vh;
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem;
+      overflow: hidden;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      width: 2.5rem;
+      height: 2.5rem;
+      border: none;
+      background: var(--background);
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 1rem;
+      transition: var(--transition);
+      z-index: 1;
+    }
+
+    .modal-close:hover {
+      background: var(--danger-light);
+      color: var(--danger);
+      transform: rotate(90deg);
+    }
+
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-xl);
+      padding: 2.5rem 1rem;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+      margin-bottom: 1.5rem;
+      background: var(--background);
+    }
+
+    .drop-zone:hover,
+    .drop-zone.drag-over {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      transform: scale(1.02);
+    }
+
+    .drop-zone i {
+      font-size: 2.5rem;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .drop-zone p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin: 0;
+      font-weight: 500;
+    }
+
+    .drop-zone strong {
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    #drop-file-input {
+      display: none;
+    }
+
+    .selected-file {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      background: var(--primary-light);
+      border-radius: var(--radius-lg);
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+      border: 1px solid var(--primary);
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .selected-file i {
+      color: var(--primary);
+      font-size: 1.25rem;
+    }
+
+    .selected-file .file-name {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 600;
+    }
+
+    .selected-file .file-size {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .file-name-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      font-size: 0.875rem;
+      outline: none;
+      color: var(--text);
+      margin-bottom: 1rem;
+      transition: var(--transition);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 500;
+    }
+
+    .file-name-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px var(--primary-light);
+    }
+
+    .btn-primary-full {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      border: none;
+      border-radius: var(--radius-lg);
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: var(--shadow-md);
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .btn-primary-full:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn-primary-full:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .btn-primary-full:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .danger-icon {
+      width: 3.5rem;
+      height: 3.5rem;
+      border-radius: 999px;
+      background: var(--danger-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--danger);
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .btn-danger {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.6rem 1.5rem;
+      background: linear-gradient(135deg, var(--danger), #dc2626);
+      color: white;
+      border: none;
+      border-radius: var(--radius-lg);
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: var(--shadow-md);
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+      filter: brightness(1.1);
+    }
+
+    .btn-danger:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-cancel {
+      padding: 0.6rem 1.25rem;
+      background: var(--background);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text);
+      transition: var(--transition);
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .btn-cancel:hover {
+      background: var(--border);
+      border-color: var(--text-muted);
+    }
+
+    .reader-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      padding-right: 5rem;
+    }
+
+    .reader-content {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 0.25rem;
+      min-height: 0;
+    }
+
+    .reader-para {
+      font-family: 'Merriweather', serif;
+      line-height: 1.9;
+      margin-bottom: 1.25rem;
+      color: var(--text);
+      font-size: 17px;
+      padding: 0.5rem;
+      border-radius: var(--radius-md);
+      transition: var(--transition);
+      font-weight: 400;
+    }
+
+    .reader-para:hover {
+      background: var(--background);
+    }
+
+    .font-size-btn {
+      padding: 0.3rem 0.9rem;
+      border: 2px solid var(--border);
+      background: var(--surface);
+      border-radius: var(--radius-md);
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .font-size-btn:hover {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    #mobile-menu-btn {
+      display: none;
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 45;
+      width: 3rem;
+      height: 3rem;
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: var(--shadow-lg);
+      font-size: 1.25rem;
+      color: var(--primary);
+      transition: var(--transition);
+    }
+
+    #mobile-menu-btn:hover {
+      background: var(--primary-light);
+      transform: scale(1.05);
+    }
+
+    .sidebar-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: 40;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .sidebar-backdrop.show {
+      opacity: 1;
+    }
+
+    @media (max-width: 768px) {
+      #mobile-menu-btn {
+        display: flex;
+      }
+
+      #sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        transform: translateX(-100%);
+        z-index: 50;
+        box-shadow: var(--shadow-xl);
+      }
+
+      #sidebar.open {
+        transform: translateX(0);
+      }
+
+      .sidebar-backdrop.show {
+        display: block;
+      }
+
+      #tabs-area {
+        padding-top: 5rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+
+      .tab-bar {
+        border-radius: var(--radius-lg);
+      }
+
+      .tab-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+      }
+
+      .main-search-input {
+        padding: 1rem 8rem 1rem 3rem;
+      }
+    }
+
+    #toast-container {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      z-index: 1100;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: var(--surface);
+      border: none;
+      border-radius: var(--radius-lg);
+      padding: 1rem 1.25rem;
+      box-shadow: var(--shadow-xl);
+      font-size: 0.875rem;
+      font-weight: 600;
+      opacity: 0;
+      transform: translateX(20px);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      max-width: 350px;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      border-left: 4px solid var(--primary);
+      pointer-events: auto;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .toast.error {
+      border-left-color: var(--danger);
+    }
+
+    .toast.success {
+      border-left-color: var(--success);
+    }
+
+    .toast i {
+      font-size: 1.1rem;
+    }
+
+    .toast.error i {
+      color: var(--danger);
+    }
+
+    .toast.success i {
+      color: var(--success);
+    }
+
+    .progress-bar {
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    @media print {
+      #sidebar,
+      #mobile-menu-btn,
+      .tab-bar,
+      .search-bar-wrap,
+      .btn-auth,
+      .btn-add,
+      .book-actions {
+        display: none !important;
+      }
+
+      #main {
+        overflow: visible;
+      }
+
+      .result-card,
+      .answer-box,
+      .citation-card {
+        break-inside: avoid;
+        border: 1px solid #000;
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<button id="mobile-menu-btn" onclick="App.UI.toggleSidebar()"><i class="bi bi-list"></i></button>
+<div class="sidebar-backdrop" id="sidebar-backdrop" onclick="App.UI.toggleSidebar()"></div>
+
+<div id="app">
+  <aside id="sidebar">
+    <div class="sidebar-header">
+      <div class="brand">
+        <div class="brand-icon"><i class="bi bi-book-half"></i></div>
+        <p class="brand-name">BookHunter</p>
+      </div>
+      <div id="add-book-wrap">
+        <div class="login-hint">Войдите, чтобы добавлять книги</div>
+      </div>
+    </div>
+
+    <div class="sidebar-body">
+      <div class="collection-header">
+        <span>Ваша коллекция</span>
+        <span class="count-badge" id="book-count">0</span>
+      </div>
+
+      <div class="book-search-wrap" id="book-filter-wrap" style="display:none">
+        <i class="bi bi-search"></i>
+        <input class="book-search-input" type="text" placeholder="Найти книгу..." id="book-filter-input" oninput="App.Books.filter(this.value)" />
+      </div>
+
+      <div id="book-list">
+        <div class="empty-books" id="books-empty">
+          <i class="bi bi-journal-x"></i>
+          <span>Книги ещё не добавлены</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div id="user-info" style="display:none" class="user-row">
+        <div class="user-avatar-placeholder"><i class="bi bi-person"></i></div>
+        <span class="user-name" id="user-name-label">Пользователь</span>
+      </div>
+      <button class="btn-auth btn-login" id="auth-btn" onclick="App.Auth.handleAuth()">
+        <i class="bi bi-box-arrow-in-right"></i>
+        <span id="auth-btn-label">Войти</span>
+      </button>
+    </div>
+  </aside>
+
+  <main id="main">
+    <div id="empty-state" style="display:flex">
+      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z'%3E%3C/path%3E%3Cpath d='M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z'%3E%3C/path%3E%3C/svg%3E" alt="Пустая библиотека" />
+      <h2 class="serif">Умный поиск по книгам</h2>
+      <p>Загрузите текстовые файлы книг, чтобы искать фрагменты или задавать вопросы по содержанию.</p>
+      <div class="hint-pill">
+        <i class="bi bi-collection"></i>
+        <span>Войдите и добавьте первую книгу через боковую панель</span>
+      </div>
+    </div>
+
+    <div id="tabs-area" style="display:none">
+      <div class="tab-bar">
+        <button class="tab-btn active" id="tab-btn-search" onclick="App.UI.switchTab('search')">
+          <i class="bi bi-search"></i> Поиск фрагментов
+        </button>
+        <button class="tab-btn" id="tab-btn-ask" onclick="App.UI.switchTab('ask')">
+          <i class="bi bi-question-circle"></i> Задать вопрос
+        </button>
+        <button class="tab-btn" id="tab-btn-rec" style="display:none" onclick="App.UI.switchTab('rec')">
+          <i class="bi bi-stars"></i> Рекомендации
+        </button>
+      </div>
+
+      <div class="tab-panel active" id="panel-search">
+        <div class="panel-header">
+          <h2>Поиск фрагментов</h2>
+          <p>Найдите нужные отрывки и цитаты во всех загруженных книгах</p>
+        </div>
+        <form onsubmit="App.Search.doSearch(event)">
+          <div class="search-bar-wrap">
+            <i class="bi bi-search icon-left"></i>
+            <input id="search-input" class="main-search-input" type="text" placeholder="Введите слова, фразы или тему для поиска..." />
+            <button class="search-bar-btn" type="submit" id="search-btn">
+              <i class="bi bi-search"></i> Найти
+            </button>
+          </div>
+        </form>
+        <div id="search-results" style="min-height:300px"></div>
+      </div>
+
+      <div class="tab-panel" id="panel-ask">
+        <div class="panel-header">
+          <h2>Задать вопрос</h2>
+          <p>Задайте любой вопрос, и ИИ ответит, используя ваши книги и свои знания</p>
+        </div>
+        <form onsubmit="App.Ask.doAsk(event)">
+          <div class="search-bar-wrap">
+            <i class="bi bi-question-circle icon-left"></i>
+            <input id="ask-input" class="main-search-input" type="text" placeholder="Введите ваш вопрос..." />
+            <button class="search-bar-btn" type="submit" id="ask-btn">
+              <i class="bi bi-send"></i> Спросить
+            </button>
+          </div>
+        </form>
+        <div id="ask-results" style="min-height:300px"></div>
+      </div>
+
+      <div class="tab-panel" id="panel-rec">
+        <div class="panel-header">
+          <div class="rec-badge"><i class="bi bi-stars"></i> Персональные рекомендации</div>
+          <h2>Книги для вас</h2>
+          <p>Рекомендации на основе вашей библиотеки и предпочтений</p>
+        </div>
+
+        <div class="rec-toolbar">
+          <button class="btn-sm-outline" onclick="App.Recs.toggleGenresPanel()">
+            <i class="bi bi-sliders"></i> Жанровые предпочтения
+          </button>
+          <button class="btn-sm-primary-outline" id="rec-refresh-btn" onclick="App.Recs.loadRecommendations()">
+            <i class="bi bi-arrow-clockwise" id="rec-refresh-icon"></i> Обновить
+          </button>
+        </div>
+
+        <div class="genres-panel" id="genres-panel">
+          <div style="font-size:0.9rem; font-weight:600; margin-bottom:1rem;">
+            <i class="bi bi-tags me-2"></i>Выберите любимые жанры:
+          </div>
+          <div id="genres-chips" class="d-flex flex-wrap gap-2 mb-3"></div>
+          <div style="display:flex; gap:0.5rem; margin-top:1rem">
+            <button class="btn-sm-primary-outline" onclick="App.Recs.saveGenres()">
+              <i class="bi bi-check-lg"></i> Сохранить
+            </button>
+            <button class="btn-cancel" onclick="App.Recs.toggleGenresPanel()">
+              <i class="bi bi-x-lg"></i> Отмена
+            </button>
+          </div>
+        </div>
+
+        <div id="rec-results" style="min-height:300px"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="overlay" id="upload-overlay">
+  <div class="modal-box">
+    <button class="modal-close" onclick="App.Modals.close('upload-overlay')"><i class="bi bi-x-lg"></i></button>
+    <h5 style="font-weight:700;margin-bottom:1.25rem;font-family:'Montserrat',sans-serif;">
+      <i class="bi bi-cloud-upload me-2" style="color:var(--primary)"></i>Добавить книгу
+    </h5>
+
+    <div class="drop-zone" id="drop-zone" 
+         onclick="document.getElementById('drop-file-input').click()"
+         ondragover="App.Upload.handleDragOver(event)" 
+         ondragleave="App.Upload.handleDragLeave()" 
+         ondrop="App.Upload.handleDrop(event)">
+      <i class="bi bi-file-earmark-text"></i>
+      <p><strong>Нажмите или перетащите</strong> текстовый файл сюда</p>
+      <p style="font-size:0.75rem;margin-top:0.25rem">Поддерживаются файлы .txt</p>
+    </div>
+    <input type="file" id="drop-file-input" accept=".txt,text/plain" onchange="App.Upload.handleFileSelect(this)" />
+
+    <div id="selected-file-info" style="display:none" class="selected-file">
+      <i class="bi bi-file-text"></i>
+      <span class="file-name" id="sel-file-name">—</span>
+      <span class="file-size" id="sel-file-size">—</span>
+    </div>
+
+    <div style="margin-bottom:0.75rem">
+      <label style="font-size:0.8rem;font-weight:600;margin-bottom:0.3rem;display:block">Название книги</label>
+      <input class="file-name-input" type="text" id="upload-title-input" placeholder="Например: Война и мир" />
+    </div>
+
+    <div style="height:4px;background:var(--border);border-radius:999px;margin-bottom:1rem;overflow:hidden">
+      <div class="progress-bar" id="upload-progress" style="width:0%"></div>
+    </div>
+
+    <button class="btn-primary-full" id="upload-btn" onclick="App.Upload.uploadBook()">
+      <i class="bi bi-cloud-upload"></i> Загрузить книгу
+    </button>
+    <div id="upload-error" style="color:var(--danger);font-size:0.8rem;margin-top:0.5rem;display:none"></div>
+  </div>
+</div>
+
+<div class="overlay" id="delete-overlay">
+  <div class="modal-box">
+    <div style="display:flex;align-items:flex-start;gap:1rem;margin-bottom:1.25rem">
+      <div class="danger-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+      <div>
+        <h6 style="font-weight:700;margin-bottom:0.3rem;font-family:'Montserrat',sans-serif;">Удалить книгу</h6>
+        <p style="font-size:0.85rem;color:var(--text-muted);margin:0;font-weight:500;">
+          Вы уверены, что хотите удалить <strong id="delete-book-name">книгу</strong>? Это действие нельзя отменить.
+        </p>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:0.5rem;margin-top:1rem">
+      <button class="btn-cancel" onclick="App.Modals.close('delete-overlay')">Отмена</button>
+      <button class="btn-danger" id="delete-confirm-btn" onclick="App.Books.confirmDelete()">
+        <i class="bi bi-trash3"></i> Удалить
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="reader-overlay">
+  <div class="modal-box xl">
+    <button class="modal-close" onclick="App.Modals.close('reader-overlay')"><i class="bi bi-x-lg"></i></button>
+    <div class="reader-toolbar">
+      <i class="bi bi-book-open" style="color:var(--primary);font-size:1.25rem"></i>
+      <strong id="reader-title" style="font-family:'Montserrat',sans-serif;font-size:1rem;flex:1;font-weight:700;">—</strong>
+      <button class="font-size-btn" onclick="App.Reader.changeFont(-1)">A−</button>
+      <button class="font-size-btn" onclick="App.Reader.changeFont(1)">A+</button>
+    </div>
+    <div class="reader-content" id="reader-content">
+      <div class="loading-state"><i class="bi bi-hourglass-split spin"></i><span>Загрузка...</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="login-overlay">
+  <div class="modal-box">
+    <button class="modal-close" onclick="App.Modals.close('login-overlay')"><i class="bi bi-x-lg"></i></button>
+    <div style="margin-bottom:1.5rem">
+      <h5 style="font-weight:800;font-family:'Montserrat',sans-serif;font-size:1.5rem;margin-bottom:0.3rem;letter-spacing:-0.02em;">
+        <i class="bi bi-box-arrow-in-right me-2" style="color:var(--primary)"></i>Вход
+      </h5>
+      <p style="color:var(--text-muted);font-size:0.9rem;margin:0;font-weight:500;">Введите учетные данные</p>
+    </div>
+    <form onsubmit="App.Auth.submitLogin(event)" id="login-form">
+      <div style="margin-bottom:1rem">
+        <label style="font-size:0.85rem;font-weight:600;margin-bottom:0.4rem;display:block">Логин</label>
+        <input type="text" id="login-email" class="file-name-input" placeholder="Почта или никнейм" required />
+      </div>
+      <div style="margin-bottom:1.5rem">
+        <label style="font-size:0.85rem;font-weight:600;margin-bottom:0.4rem;display:block">Пароль</label>
+        <input type="password" id="login-password" class="file-name-input" placeholder="••••••••" required />
+      </div>
+      <div id="login-error" style="color:var(--danger);font-size:0.8rem;margin-bottom:0.75rem;display:none;font-weight:500;"></div>
+      <button type="submit" class="btn-primary-full" id="login-btn">
+        <i class="bi bi-box-arrow-in-right"></i> Войти
+      </button>
+    </form>
+    <div style="text-align:center;margin-top:1rem;font-size:0.85rem;font-weight:500;">
+      Нет аккаунта? 
+      <button style="background:none;border:none;color:var(--primary);cursor:pointer;text-decoration:underline;padding:0;font-weight:600;font-family:'Montserrat',sans-serif;" onclick="App.Auth.switchMode('register')">
+        Зарегистрироваться
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="register-overlay">
+  <div class="modal-box">
+    <button class="modal-close" onclick="App.Modals.close('register-overlay')"><i class="bi bi-x-lg"></i></button>
+    <div style="margin-bottom:1.5rem">
+      <h5 style="font-weight:800;font-family:'Montserrat',sans-serif;font-size:1.5rem;margin-bottom:0.3rem;letter-spacing:-0.02em;">
+        <i class="bi bi-pencil-square me-2" style="color:var(--primary)"></i>Регистрация
+      </h5>
+      <p style="color:var(--text-muted);font-size:0.9rem;margin:0;font-weight:500;">Создайте новый аккаунт</p>
+    </div>
+    <form onsubmit="App.Auth.submitRegister(event)" id="register-form">
+      <div style="margin-bottom:1rem">
+        <label style="font-size:0.85rem;font-weight:600;margin-bottom:0.4rem;display:block">Email</label>
+        <input type="email" id="register-email" class="file-name-input" placeholder="Почта" required />
+      </div>
+      <div style="margin-bottom:1rem">
+        <label style="font-size:0.85rem;font-weight:600;margin-bottom:0.4rem;display:block">Никнейм</label>
+        <input type="text" id="register-nickname" class="file-name-input" placeholder="Никнейм" required />
+      </div>
+      <div style="margin-bottom:1rem">
+        <label style="font-size:0.85rem;font-weight:600;margin-bottom:0.4rem;display:block">Отображаемое имя</label>
+        <input type="text" id="register-name" class="file-name-input" placeholder="Имя" required />
+      </div>
+      <div style="margin-bottom:1rem">
+        <label style="font-size:0.85rem;font-weight:600;margin-bottom:0.4rem;display:block">Пароль</label>
+        <input type="password" id="register-password" class="file-name-input" placeholder="Минимум 6 символов" required />
+      </div>
+      <div style="margin-bottom:1.5rem">
+        <label style="font-size:0.85rem;font-weight:600;margin-bottom:0.4rem;display:block">Подтверждение пароля</label>
+        <input type="password" id="register-password-confirm" class="file-name-input" placeholder="Повторите пароль" required />
+      </div>
+      <div id="register-error" style="color:var(--danger);font-size:0.8rem;margin-bottom:0.75rem;display:none;font-weight:500;"></div>
+      <button type="submit" class="btn-primary-full" id="register-btn">
+        <i class="bi bi-person-plus"></i> Зарегистрироваться
+      </button>
+    </form>
+    <div style="text-align:center;margin-top:1rem;font-size:0.85rem;font-weight:500;">
+      Уже есть аккаунт? 
+      <button style="background:none;border:none;color:var(--primary);cursor:pointer;text-decoration:underline;padding:0;font-weight:600;font-family:'Montserrat',sans-serif;" onclick="App.Auth.switchMode('login')">
+        Войти
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script>
+window.App = {};
+
+App.Utils = {
+  escape: function(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  },
+
+  formatBytes: function(bytes) {
+    if (bytes < 1024) return bytes + ' Б';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' КБ';
+    return (bytes / 1048576).toFixed(1) + ' МБ';
+  },
+
+  formatDate: function(dateStr) {
+    if (!dateStr) return '';
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('ru-RU', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
+    } catch (e) {
+      return '';
+    }
+  },
+
+  showError: function(elementId, message) {
+    const el = document.getElementById(elementId);
+    if (el) {
+      el.textContent = message;
+      el.style.display = 'block';
+      setTimeout(() => {
+        el.style.display = 'none';
+      }, 5000);
+    }
+  },
+
+  debounce: function(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+};
+
+App.Toast = {
+  show: function(message, type = 'info', duration = 3000) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    const icon = document.createElement('i');
+    icon.className = type === 'success' ? 'bi bi-check-circle-fill' : 
+                    type === 'error' ? 'bi bi-exclamation-circle-fill' : 
+                    'bi bi-info-circle-fill';
+    
+    const text = document.createElement('span');
+    text.textContent = message;
+    
+    toast.appendChild(icon);
+    toast.appendChild(text);
+    container.appendChild(toast);
+
+    requestAnimationFrame(() => {
+      toast.classList.add('show');
+    });
+
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.remove();
+        }
+      }, 300);
+    }, duration);
+  },
+
+  success: function(message) {
+    this.show(message, 'success');
+  },
+
+  error: function(message) {
+    this.show(message, 'error');
+  },
+
+  info: function(message) {
+    this.show(message, 'info');
+  }
+};
+
+App.Modals = {
+  open: function(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+  },
+
+  close: function(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.classList.remove('show');
+      document.body.style.overflow = '';
+    }
+  },
+
+  closeAll: function() {
+    const modals = ['upload-overlay', 'delete-overlay', 'reader-overlay', 'login-overlay', 'register-overlay'];
+    modals.forEach(id => this.close(id));
+  },
+
+  closeIfOutside: function(event, modalId) {
+    if (event.target.id === modalId) {
+      this.close(modalId);
+    }
+  }
+};
+
+App.State = {
+  user: null,
+  books: [],
+  filteredBooks: [],
+  deleteTarget: null,
+  selectedGenres: [],
+  readerFontSize: 17,
+  uploadFile: null,
+
+  init: async function() {
+    await this.loadUser();
+    await this.loadBooks();
+    this.renderUI();
+    this.renderBookList();
+    if (this.user) {
+      await this.loadPreferences();
+      setTimeout(() => App.Recs.renderGenreChips(), 100);
+    }
+  },
+
+  loadUser: async function() {
+    try {
+      const response = await fetch('/api/auth');
+      if (!response.ok) return;
+      const data = await response.json();
+      this.user = data.user || null;
+    } catch (e) {
+      this.user = null;
+    }
+  },
+
+  loadBooks: async function() {
+    if (!this.user) {
+      this.books = [];
+      this.filteredBooks = [];
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/books');
+      if (!response.ok) {
+        this.books = [];
+        this.filteredBooks = [];
+        return;
+      }
+      const data = await response.json();
+      this.books = data.books || [];
+      this.filteredBooks = [...this.books];
+    } catch (e) {
+      this.books = [];
+      this.filteredBooks = [];
+    }
+  },
+
+  loadPreferences: async function() {
+    try {
+      const response = await fetch('/api/preferences');
+      if (!response.ok) return;
+      const data = await response.json();
+      this.selectedGenres = data.genres || [];
+    } catch (e) {}
+  },
+
+  renderUI: function() {
+    const isAuth = !!this.user;
+    const authBtn = document.getElementById('auth-btn');
+    const authLabel = document.getElementById('auth-btn-label');
+    const userInfo = document.getElementById('user-info');
+    const addBookWrap = document.getElementById('add-book-wrap');
+    const bookFilterWrap = document.getElementById('book-filter-wrap');
+    const recTab = document.getElementById('tab-btn-rec');
+
+    if (isAuth) {
+      authBtn.className = 'btn-auth btn-logout';
+      authLabel.textContent = 'Выйти';
+      authBtn.querySelector('i').className = 'bi bi-box-arrow-right';
+      userInfo.style.display = 'flex';
+      document.getElementById('user-name-label').textContent = this.user.name || 'Пользователь';
+      addBookWrap.innerHTML = '<button class="btn-add" onclick="App.Upload.openUpload()"><i class="bi bi-plus-lg"></i> Добавить книгу</button>';
+      bookFilterWrap.style.display = 'block';
+      if (recTab) recTab.style.display = 'flex';
+    } else {
+      authBtn.className = 'btn-auth btn-login';
+      authLabel.textContent = 'Войти';
+      authBtn.querySelector('i').className = 'bi bi-box-arrow-in-right';
+      userInfo.style.display = 'none';
+      addBookWrap.innerHTML = '<div class="login-hint">Войдите, чтобы добавлять книги</div>';
+      bookFilterWrap.style.display = 'none';
+      if (recTab) recTab.style.display = 'none';
+    }
+
+    this.updateLayout();
+  },
+
+  updateLayout: function() {
+    const showEmpty = this.books.length === 0 && !this.user;
+    const emptyState = document.getElementById('empty-state');
+    const tabsArea = document.getElementById('tabs-area');
+
+    if (emptyState) emptyState.style.display = showEmpty ? 'flex' : 'none';
+    if (tabsArea) tabsArea.style.display = showEmpty ? 'none' : 'block';
+  },
+
+  renderBookList: function() {
+    const list = document.getElementById('book-list');
+    const emptyEl = document.getElementById('books-empty');
+    const countEl = document.getElementById('book-count');
+
+    if (!list || !emptyEl || !countEl) return;
+
+    countEl.textContent = this.books.length;
+
+    if (!this.filteredBooks.length) {
+      list.innerHTML = '';
+      emptyEl.style.display = 'block';
+      return;
+    }
+
+    emptyEl.style.display = 'none';
+
+    list.innerHTML = this.filteredBooks.map(book => {
+      const escapedTitle = this.escapeTitle(book.title);
+      return `
+        <div class="book-item">
+          <div class="book-icon"><i class="bi bi-book"></i></div>
+          <div class="book-info" onclick="App.Reader.open(${book.id}, '${escapedTitle}')">
+            <div class="book-title">${App.Utils.escape(book.title)}</div>
+            <div class="book-meta">
+              <i class="bi bi-file-text"></i>
+              ${book.chunkCount || 0} фрагм. · ${App.Utils.formatDate(book.createdAt)}
+            </div>
+          </div>
+          <div class="book-actions">
+            <button class="book-action-btn" title="Переименовать" onclick="App.Books.openRename(${book.id}, '${escapedTitle}')">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button class="book-action-btn" title="Читать" onclick="App.Reader.open(${book.id}, '${escapedTitle}')">
+              <i class="bi bi-eye"></i>
+            </button>
+            <button class="book-action-btn danger" title="Удалить" onclick="App.Books.openDelete(${book.id}, '${escapedTitle}')">
+              <i class="bi bi-trash3"></i>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  },
+
+  escapeTitle: function(title) {
+    return title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+  }
+};
+
+App.Auth = {
+  handleAuth: function() {
+    if (App.State.user) {
+      this.logout();
+    } else {
+      App.Modals.open('login-overlay');
+    }
+  },
+
+  logout: async function() {
+    try {
+      await fetch('/api/logout', { method: 'POST' });
+    } catch (e) {}
+
+    App.State.user = null;
+    App.State.books = [];
+    App.State.filteredBooks = [];
+    App.State.selectedGenres = [];
+    
+    document.getElementById('search-input').value = '';
+    document.getElementById('ask-input').value = '';
+    
+    App.UI.toggleSidebar(false);
+    App.State.renderUI();
+    App.State.renderBookList();
+    App.Toast.success('Вы вышли из аккаунта');
+  },
+
+  switchMode: function(mode) {
+    if (mode === 'login') {
+      App.Modals.close('register-overlay');
+      App.Modals.open('login-overlay');
+    } else {
+      App.Modals.close('login-overlay');
+      App.Modals.open('register-overlay');
+    }
+    
+    document.getElementById('login-error').style.display = 'none';
+    document.getElementById('register-error').style.display = 'none';
+  },
+
+  submitLogin: async function(event) {
+    event.preventDefault();
+    
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    
+    if (!email || !password) {
+      App.Utils.showError('login-error', 'Заполните все поля');
+      return;
+    }
+
+    const btn = document.getElementById('login-btn');
+    const originalText = btn.innerHTML;
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-hourglass-split spin"></i> Вход...';
+    
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Неверные учетные данные');
+      }
+
+      if (data.user) {
+        App.Toast.success('Вход выполнен! Обновление...');
+        setTimeout(() => window.location.reload(), 1000);
+      } else {
+        throw new Error('Ошибка при входе');
+      }
+    } catch (err) {
+      App.Utils.showError('login-error', err.message);
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
+  },
+
+  submitRegister: async function(event) {
+    event.preventDefault();
+    
+    const email = document.getElementById('register-email').value.trim();
+    const nickname = document.getElementById('register-nickname').value.trim();
+    const name = document.getElementById('register-name').value.trim();
+    const password = document.getElementById('register-password').value;
+    const passwordConfirm = document.getElementById('register-password-confirm').value;
+    
+    if (!email || !nickname || !name || !password) {
+      App.Utils.showError('register-error', 'Заполните все поля');
+      return;
+    }
+    
+    if (password.length < 6) {
+      App.Utils.showError('register-error', 'Пароль должен быть не менее 6 символов');
+      return;
+    }
+    
+    if (password !== passwordConfirm) {
+      App.Utils.showError('register-error', 'Пароли не совпадают');
+      return;
+    }
+
+    const btn = document.getElementById('register-btn');
+    const originalText = btn.innerHTML;
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-hourglass-split spin"></i> Регистрация...';
+    
+    try {
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, nickname, name, password })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Ошибка при регистрации');
+      }
+
+      if (data.user) {
+        App.State.user = data.user;
+        await App.State.loadBooks();
+        App.State.filteredBooks = [...App.State.books];
+        
+        App.Modals.close('register-overlay');
+        document.getElementById('register-form').reset();
+        
+        App.State.renderUI();
+        App.State.renderBookList();
+        App.UI.switchTab('search');
+        App.Toast.success('Аккаунт создан! Вы вошли в систему.');
+      } else {
+        throw new Error('Ошибка при регистрации');
+      }
+    } catch (err) {
+      App.Utils.showError('register-error', err.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
+  }
+};
+
+App.Books = {
+  filter: App.Utils.debounce(function(query) {
+    const lq = query.toLowerCase();
+    App.State.filteredBooks = lq.trim()
+      ? App.State.books.filter(book => book.title.toLowerCase().includes(lq))
+      : [...App.State.books];
+    App.State.renderBookList();
+  }, 300),
+
+  openRename: function(id, title) {
+    const newTitle = prompt('Введите новое название книги:', title);
+    if (newTitle && newTitle.trim() && newTitle.trim() !== title) {
+      this.renameBook(id, newTitle.trim());
+    }
+  },
+
+  renameBook: async function(id, newTitle) {
+    try {
+      const response = await fetch(`/api/books/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: newTitle })
+      });
+
+      if (!response.ok) throw new Error();
+
+      await App.State.loadBooks();
+      App.State.filteredBooks = [...App.State.books];
+      App.State.renderBookList();
+      App.Toast.success('Книга переименована');
+    } catch (e) {
+      App.Toast.error('Не удалось переименовать книгу');
+    }
+  },
+
+  openDelete: function(id, title) {
+    App.State.deleteTarget = { id, title };
+    document.getElementById('delete-book-name').textContent = `«${title}»`;
+    App.Modals.open('delete-overlay');
+  },
+
+  confirmDelete: async function() {
+    if (!App.State.deleteTarget) return;
+
+    const btn = document.getElementById('delete-confirm-btn');
+    const originalText = btn.innerHTML;
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-hourglass-split spin"></i> Удаление...';
+
+    try {
+      const response = await fetch(`/api/books/${App.State.deleteTarget.id}`, { 
+        method: 'DELETE' 
+      });
+      
+      if (!response.ok) throw new Error();
+
+      await App.State.loadBooks();
+      App.State.filteredBooks = [...App.State.books];
+      
+      document.getElementById('book-filter-input').value = '';
+      App.State.renderBookList();
+      App.Modals.close('delete-overlay');
+      App.Toast.success('Книга удалена из библиотеки');
+      App.State.updateLayout();
+    } catch (e) {
+      App.Toast.error('Не удалось удалить книгу');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+      App.State.deleteTarget = null;
+    }
+  }
+};
+
+App.Upload = {
+  openUpload: function() {
+    App.State.uploadFile = null;
+    document.getElementById('drop-file-input').value = '';
+    document.getElementById('selected-file-info').style.display = 'none';
+    document.getElementById('upload-title-input').value = '';
+    document.getElementById('upload-progress').style.width = '0%';
+    document.getElementById('upload-error').style.display = 'none';
+    App.Modals.open('upload-overlay');
+  },
+
+  handleDragOver: function(event) {
+    event.preventDefault();
+    document.getElementById('drop-zone').classList.add('drag-over');
+  },
+
+  handleDragLeave: function() {
+    document.getElementById('drop-zone').classList.remove('drag-over');
+  },
+
+  handleDrop: function(event) {
+    event.preventDefault();
+    document.getElementById('drop-zone').classList.remove('drag-over');
+    const file = event.dataTransfer.files[0];
+    if (file) this.setFile(file);
+  },
+
+  handleFileSelect: function(input) {
+    if (input.files[0]) this.setFile(input.files[0]);
+  },
+
+  setFile: function(file) {
+    App.State.uploadFile = file;
+    document.getElementById('sel-file-name').textContent = file.name;
+    document.getElementById('sel-file-size').textContent = App.Utils.formatBytes(file.size);
+    document.getElementById('selected-file-info').style.display = 'flex';
+    
+    const titleInput = document.getElementById('upload-title-input');
+    titleInput.value = file.name.replace(/\.[^.]+$/, '').replace(/[_-]/g, ' ');
+  },
+
+  uploadBook: async function() {
+    const file = App.State.uploadFile;
+    const title = document.getElementById('upload-title-input').value.trim();
+
+    if (!file) {
+      App.Utils.showError('upload-error', 'Выберите файл.');
+      return;
+    }
+    
+    if (!title) {
+      App.Utils.showError('upload-error', 'Введите название книги.');
+      return;
+    }
+
+    const btn = document.getElementById('upload-btn');
+    const originalText = btn.innerHTML;
+    const errorEl = document.getElementById('upload-error');
+    const progressBar = document.getElementById('upload-progress');
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-hourglass-split spin"></i> Загрузка...';
+    errorEl.style.display = 'none';
+    
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress = Math.min(progress + 5, 85);
+      progressBar.style.width = progress + '%';
+    }, 200);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('title', title);
+
+      const response = await fetch('/api/books', { 
+        method: 'POST', 
+        body: formData 
+      });
+
+      clearInterval(interval);
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || 'Ошибка загрузки');
+      }
+
+      progressBar.style.width = '100%';
+      
+      await App.State.loadBooks();
+      App.State.filteredBooks = [...App.State.books];
+      
+      document.getElementById('book-filter-input').value = '';
+      App.State.renderBookList();
+      App.Modals.close('upload-overlay');
+      App.Toast.success('Книга добавлена в библиотеку');
+      App.State.updateLayout();
+    } catch (err) {
+      clearInterval(interval);
+      progressBar.style.width = '0%';
+      App.Utils.showError('upload-error', err.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
+  }
+};
+
+App.Reader = {
+  open: async function(id, title) {
+    document.getElementById('reader-title').textContent = title;
+    document.getElementById('reader-content').innerHTML = 
+      '<div class="loading-state"><i class="bi bi-hourglass-split spin"></i><span>Загрузка...</span></div>';
+    
+    App.Modals.open('reader-overlay');
+
+    try {
+      const response = await fetch(`/api/books/${id}/content`);
+      if (!response.ok) throw new Error();
+      
+      const data = await response.json();
+      const chunks = data.chunks || [];
+      
+      const html = chunks.map(chunk => 
+        `<p class="reader-para" style="font-size:${App.State.readerFontSize}px">${App.Utils.escape(chunk.text || '')}</p>`
+      ).join('');
+      
+      document.getElementById('reader-content').innerHTML = html || 
+        '<p class="reader-para">Нет содержимого.</p>';
+    } catch (e) {
+      document.getElementById('reader-content').innerHTML = 
+        '<div class="empty-result"><i class="bi bi-exclamation-circle"></i><p>Не удалось загрузить содержимое</p></div>';
+    }
+  },
+
+  changeFont: function(delta) {
+    App.State.readerFontSize = Math.max(12, Math.min(24, App.State.readerFontSize + delta));
+    document.querySelectorAll('.reader-para').forEach(el => {
+      el.style.fontSize = App.State.readerFontSize + 'px';
+    });
+  }
+};
+
+App.Search = {
+  doSearch: async function(event) {
+    event.preventDefault();
+
+    const input = document.getElementById('search-input');
+    const query = input.value.trim();
+    
+    if (!query) return;
+
+    const btn = document.getElementById('search-btn');
+    const originalText = btn.innerHTML;
+    const resultsEl = document.getElementById('search-results');
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-hourglass-split spin"></i> Ищем...';
+    
+    resultsEl.innerHTML = `
+      <div class="loading-state">
+        <i class="bi bi-hourglass-split spin" style="font-size:1.5rem"></i>
+        <p style="margin-top:.5rem">Ищем в архивах...</p>
+      </div>
+    `;
+
+    try {
+      const response = await fetch('/api/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, topK: 5 })
+      });
+
+      const data = await response.json();
+
+      if (!data.found || !data.fragments || !data.fragments.length) {
+        resultsEl.innerHTML = `
+          <div class="empty-result">
+            <i class="bi bi-search"></i>
+            <h3>Ничего не найдено</h3>
+            <p>Попробуйте другой запрос или добавьте больше книг.</p>
+          </div>
+        `;
+      } else {
+        const cards = data.fragments.map(f => `
+          <div class="result-card">
+            <div class="result-meta">
+              <span class="badge-score">${Math.round((f.score || 0) * 100)}% совпадение</span>
+              <span class="badge-book">
+                <i class="bi bi-book"></i>
+                ${App.Utils.escape(f.bookTitle || '')}
+              </span>
+              <span class="badge-location">
+                <i class="bi bi-geo-alt"></i>
+                ${App.Utils.escape(f.location || 'Фрагмент')}
+              </span>
+            </div>
+            <p class="result-text">«${App.Utils.escape(f.text || '')}»</p>
+          </div>
+        `).join('');
+
+        resultsEl.innerHTML = `
+          <div class="section-label">Найденные фрагменты</div>
+          ${cards}
+        `;
+      }
+    } catch (e) {
+      resultsEl.innerHTML = `
+        <div class="empty-result">
+          <i class="bi bi-exclamation-circle"></i>
+          <p>Ошибка запроса. Попробуйте снова.</p>
+        </div>
+      `;
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
+  }
+};
+
+App.Ask = {
+  doAsk: async function(event) {
+    event.preventDefault();
+
+    const input = document.getElementById('ask-input');
+    const question = input.value.trim();
+    
+    if (!question) return;
+
+    const btn = document.getElementById('ask-btn');
+    const originalText = btn.innerHTML;
+    const resultsEl = document.getElementById('ask-results');
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-hourglass-split spin"></i> Обрабатываю вопрос...';
+    
+    resultsEl.innerHTML = `
+      <div class="loading-state">
+        <i class="bi bi-hourglass-split spin" style="font-size:1.5rem"></i>
+        <p style="margin-top:.5rem">Анализирую книги и ищу ответ...</p>
+      </div>
+    `;
+
+    try {
+      const response = await fetch('/api/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question })
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.message || 'Ошибка при получении ответа');
+      }
+
+      let html = `
+        <div class="answer-box">
+          <div class="answer-label">
+            <i class="bi bi-chat-text-fill"></i>
+            Ответ
+          </div>
+          <div class="answer-text">${App.Utils.escape(data.answer)}</div>
+        </div>
+      `;
+
+      if (data.citations && data.citations.length > 0) {
+        const citationCards = data.citations.map(c => `
+          <div class="citation-card">
+            <div class="citation-book">
+              <i class="bi bi-book-open" style="font-size:.8rem"></i>
+              <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">
+                ${App.Utils.escape(c.bookTitle || '')}
+              </span>
+              <span class="loc">${App.Utils.escape(c.location || 'Фрагмент')}</span>
+            </div>
+            <p class="citation-text">«${App.Utils.escape(c.text || '')}»</p>
+          </div>
+        `).join('');
+
+        html += `
+          <div class="sources-header">
+            <i class="bi bi-quote" style="color:var(--text-muted)"></i>
+            <span>Источники</span>
+            <span class="count-badge">${data.citations.length} фрагм.</span>
+            <div class="sep"></div>
+          </div>
+          <div style="display:grid;gap:.75rem;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))">
+            ${citationCards}
+          </div>
+        `;
+      }
+
+      resultsEl.innerHTML = html;
+      
+    } catch (e) {
+      resultsEl.innerHTML = `
+        <div class="empty-result">
+          <i class="bi bi-exclamation-circle"></i>
+          <h3>Ошибка запроса</h3>
+          <p>${e.message || 'Не удалось получить ответ. Проверьте подключение к Ollama.'}</p>
+        </div>
+      `;
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
+  }
+};
+
+App.Recs = {
+  ALL_GENRES: [
+    'Классическая литература', 
+    'Фантастика', 
+    'Детектив', 
+    'Исторический роман',
+    'Приключения', 
+    'Философия', 
+    'Психология', 
+    'Биография', 
+    'Поэзия',
+    'Триллер', 
+    'Романтика', 
+    'Фэнтези', 
+    'Научная литература', 
+    'Мемуары',
+    'Антиутопия',
+    'Магический реализм',
+    'Социальный роман'
+  ],
+
+  toggleGenresPanel: function() {
+    const panel = document.getElementById('genres-panel');
+    if (panel) {
+      panel.classList.toggle('open');
+      if (panel.classList.contains('open')) {
+        this.renderGenreChips();
+      }
+    }
+  },
+
+  renderGenreChips: function() {
+    const chipsEl = document.getElementById('genres-chips');
+    if (!chipsEl) return;
+
+    let selectedGenres = App.State.selectedGenres;
+    if (!Array.isArray(selectedGenres)) {
+      selectedGenres = [];
+      App.State.selectedGenres = [];
+    }
+
+    chipsEl.innerHTML = this.ALL_GENRES.map(genre => {
+      const selected = selectedGenres.includes(genre) ? ' selected' : '';
+      const escapedGenre = genre.replace(/'/g, "\\'");
+      return `<span class="genre-chip${selected}" onclick="App.Recs.toggleGenre('${escapedGenre}')">
+        <i class="bi bi-bookmark${selected ? '-fill' : ''}"></i>
+        ${App.Utils.escape(genre)}
+      </span>`;
+    }).join('');
+  },
+
+  toggleGenre: function(genre) {
+    if (!Array.isArray(App.State.selectedGenres)) {
+      App.State.selectedGenres = [];
+    }
+    
+    const index = App.State.selectedGenres.indexOf(genre);
+    if (index >= 0) {
+      App.State.selectedGenres.splice(index, 1);
+    } else {
+      App.State.selectedGenres.push(genre);
+    }
+    
+    this.renderGenreChips();
+  },
+
+  saveGenres: async function() {
+    const genresToSave = Array.isArray(App.State.selectedGenres) ? App.State.selectedGenres : [];
+    
+    try {
+      const response = await fetch('/api/preferences', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ genres: genresToSave })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Ошибка сохранения');
+      }
+
+      document.getElementById('genres-panel').classList.remove('open');
+      App.Toast.success('Предпочтения сохранены');
+      await this.loadRecommendations();
+    } catch (e) {
+      App.Toast.error('Не удалось сохранить предпочтения: ' + e.message);
+    }
+  },
+
+  loadRecommendations: async function() {
+    const btn = document.getElementById('rec-refresh-btn');
+    const icon = document.getElementById('rec-refresh-icon');
+    const resultsEl = document.getElementById('rec-results');
+
+    if (!btn || !icon || !resultsEl) return;
+
+    btn.disabled = true;
+    icon.className = 'bi bi-arrow-clockwise spin';
+    
+    resultsEl.innerHTML = `
+      <div class="loading-state">
+        <i class="bi bi-hourglass-split spin" style="font-size:1.5rem"></i>
+        <p style="margin-top:.5rem">Поиск книг...</p>
+      </div>
+    `;
+
+    try {
+      const genresToSend = Array.isArray(App.State.selectedGenres) ? App.State.selectedGenres : [];
+      
+      const response = await fetch('/api/recommendations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ genres: genresToSend })
+      });
+
+      const data = await response.json();
+      
+      const recs = data.recommendations || [];
+
+      if (!recs.length) {
+        resultsEl.innerHTML = `
+          <div class="empty-result">
+            <i class="bi bi-stars"></i>
+            <h3>Пока нет рекомендаций</h3>
+            <p>Выберите жанровые предпочтения и нажмите "Обновить".</p>
+          </div>
+        `;
+      } else {
+        resultsEl.innerHTML = recs.map((rec, i) => {
+          const genres = (rec.genres || []).map(g => 
+            `<span class="rec-genre-chip">
+              <i class="bi bi-tag" style="font-size:.65rem"></i>
+              ${App.Utils.escape(g)}
+            </span>`
+          ).join('');
+
+          return `
+            <div class="rec-card" onclick="App.Recs.showBookDetails(${JSON.stringify(rec).replace(/"/g, '&quot;')})">
+              <div class="rec-card-header">
+                <div class="rec-num">${i + 1}</div>
+                <div style="flex:1;min-width:0">
+                  <div class="rec-title">${App.Utils.escape(rec.title || '—')}</div>
+                  <div class="rec-author">
+                    <i class="bi bi-person" style="font-size:.75rem"></i>
+                    ${App.Utils.escape(rec.author || 'Неизвестен')}
+                  </div>
+                  <div style="margin-top:.3rem">${genres}</div>
+                </div>
+              </div>
+              <div class="rec-description">
+                ${App.Utils.escape(rec.description || 'Описание отсутствует')}
+              </div>
+              ${rec.reason ? `
+                <div class="rec-why">
+                  <span>📚 Почему стоит прочитать:</span>
+                  ${App.Utils.escape(rec.reason)}
+                </div>
+              ` : ''}
+              <div style="margin-top:0.5rem; font-size:0.8rem; color:var(--primary);">
+                <i class="bi bi-info-circle"></i> Нажмите, чтобы узнать больше
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    } catch (e) {
+      resultsEl.innerHTML = `
+        <div class="empty-result">
+          <i class="bi bi-exclamation-circle"></i>
+          <h3>Ошибка загрузки</h3>
+          <p>Не удалось получить рекомендации. Проверьте подключение к интернету.</p>
+        </div>
+      `;
+    } finally {
+      btn.disabled = false;
+      icon.className = 'bi bi-arrow-clockwise';
+    }
+  },
+
+  showBookDetails: function(book) {
+    const modalHtml = `
+      <div class="overlay show" id="book-details-modal" onclick="if(event.target===this)this.remove()">
+        <div class="modal-box" style="max-width:600px;">
+          <button class="modal-close" onclick="this.closest('.overlay').remove()">
+            <i class="bi bi-x-lg"></i>
+          </button>
+          <div style="margin-bottom:1.5rem">
+            <h3 style="font-family:'Montserrat',sans-serif; font-weight:700; margin-bottom:0.5rem;">
+              ${App.Utils.escape(book.title)}
+            </h3>
+            <p style="color:var(--text-muted); font-size:0.9rem;">
+              <i class="bi bi-person"></i> ${App.Utils.escape(book.author || 'Неизвестен')}
+            </p>
+            <div style="margin:1rem 0;">
+              ${(book.genres || []).map(g => 
+                `<span class="rec-genre-chip" style="margin-right:0.5rem;">${App.Utils.escape(g)}</span>`
+              ).join('')}
+            </div>
+            <div style="background:var(--background); padding:1.5rem; border-radius:var(--radius-lg); margin:1rem 0;">
+              <h4 style="font-weight:600; margin-bottom:0.5rem;">📖 О книге</h4>
+              <p style="line-height:1.7; color:var(--text);">
+                ${App.Utils.escape(book.description || 'Описание отсутствует')}
+              </p>
+            </div>
+            ${book.reason ? `
+              <div style="background:var(--primary-light); padding:1.5rem; border-radius:var(--radius-lg);">
+                <h4 style="font-weight:600; margin-bottom:0.5rem; color:var(--primary);">✨ Почему вам это понравится</h4>
+                <p style="line-height:1.7;">${App.Utils.escape(book.reason)}</p>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+  }
+};
+
+App.UI = {
+  switchTab: function(tabName) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+    const panel = document.getElementById(`panel-${tabName}`);
+    if (panel) panel.classList.add('active');
+
+    const btn = document.getElementById(`tab-btn-${tabName}`);
+    if (btn) btn.classList.add('active');
+
+    if (tabName === 'rec') {
+      const recResults = document.getElementById('rec-results');
+      if (recResults && !recResults.innerHTML.trim()) {
+        App.Recs.loadRecommendations();
+      }
+    }
+  },
+
+  toggleSidebar: function(force) {
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    
+    if (force !== undefined) {
+      sidebar.classList.toggle('open', force);
+      backdrop.classList.toggle('show', force);
+    } else {
+      sidebar.classList.toggle('open');
+      backdrop.classList.toggle('show');
+    }
+  }
+};
+
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape') {
+    App.Modals.closeAll();
+    
+    if (document.getElementById('sidebar').classList.contains('open')) {
+      App.UI.toggleSidebar(false);
+    }
+  }
+});
+
+document.querySelectorAll('.overlay').forEach(overlay => {
+  overlay.addEventListener('click', function(event) {
+    if (event.target === this) {
+      App.Modals.close(this.id);
+    }
+  });
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  App.State.init();
+});
+</script>
+</body>
+</html>

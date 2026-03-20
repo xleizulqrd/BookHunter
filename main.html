@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BookHunter — интеллектуальная поисковая платформа для работы с текстами</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #2563eb;
+      --primary-light: rgba(37, 99, 235, 0.1);
+      --primary-dark: #1d4ed8;
+      --secondary: #10b981;
+      --surface: #ffffff;
+      --background: #f8fafc;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-light: #334155;
+      --text-muted: #64748b;
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+      --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+      --radius-lg: 0.75rem;
+      --radius-xl: 1rem;
+      --radius-2xl: 1.5rem;
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: var(--background);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* header / nav */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 1.5rem;
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.25rem;
+      box-shadow: var(--shadow-md);
+    }
+
+    .logo-text {
+      font-size: 1.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text-light);
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white !important;
+      border: none;
+      border-radius: var(--radius-lg);
+      padding: 0.6rem 1.5rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      box-shadow: var(--shadow-md);
+      transition: var(--transition);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 0.5rem 1.5rem;
+      font-weight: 600;
+      color: var(--text);
+      transition: var(--transition);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-outline:hover {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    /* GitHub кнопка */
+    .github-link {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: transparent;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 0.5rem 1.2rem;
+      font-weight: 600;
+      color: var(--text);
+      text-decoration: none;
+      transition: var(--transition);
+    }
+
+    .github-link:hover {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    /* HERO */
+    .hero {
+      padding: 5rem 1.5rem 6rem;
+      text-align: center;
+      background: radial-gradient(circle at 70% 30%, var(--primary-light), transparent 50%);
+    }
+
+    .hero h1 {
+      font-size: 3.2rem;
+      line-height: 1.2;
+      max-width: 900px;
+      margin: 0 auto 1rem;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--primary), #7c3aed);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero .subhead {
+      font-size: 1.2rem;
+      color: var(--text-light);
+      max-width: 750px;
+      margin: 1.5rem auto 2.5rem;
+      font-weight: 500;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* features grid */
+    .section {
+      padding: 5rem 1.5rem;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .section-desc {
+      text-align: center;
+      color: var(--text-muted);
+      max-width: 700px;
+      margin: 0 auto 4rem;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2.5rem;
+    }
+
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 2rem 1.5rem;
+      transition: var(--transition);
+      box-shadow: var(--shadow-md);
+    }
+
+    .feature-card:hover {
+      transform: translateY(-8px);
+      border-color: var(--primary-light);
+      box-shadow: var(--shadow-xl);
+    }
+
+    .feature-icon {
+      width: 3.5rem;
+      height: 3.5rem;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, var(--primary-light), var(--background));
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .feature-card h3 {
+      font-size: 1.4rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .feature-card p {
+      color: var(--text-light);
+      font-weight: 500;
+    }
+
+    /* cta */
+    .cta {
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      color: white;
+      border-radius: var(--radius-2xl);
+      padding: 4rem 2.5rem;
+      text-align: center;
+    }
+
+    .cta h2 {
+      font-size: 2.5rem;
+      color: white;
+      -webkit-text-fill-color: white;
+      background: none;
+    }
+
+    .cta p {
+      color: rgba(255,255,255,0.9);
+      max-width: 600px;
+      margin: 1rem auto 2rem;
+      font-size: 1.1rem;
+    }
+
+    .btn-cta {
+      background: white;
+      color: var(--primary);
+      border: none;
+      border-radius: var(--radius-lg);
+      padding: 0.9rem 2.5rem;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: var(--shadow-xl);
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+    }
+
+    .btn-cta:hover {
+      transform: scale(1.05);
+      background: #f0f4ff;
+    }
+
+    /* footer */
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 1.5rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer a {
+      color: var(--text-light);
+      text-decoration: none;
+      font-weight: 500;
+      margin-left: 1.5rem;
+    }
+
+    /* mobile */
+    @media (max-width: 700px) {
+      .navbar {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1rem;
+      }
+      .hero h1 {
+        font-size: 2.4rem;
+      }
+      .section-title {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="logo">
+      <div class="logo-icon"><i class="bi bi-book-half"></i></div>
+      <span class="logo-text">BookHunter</span>
+    </div>
+    <div class="nav-links">
+      <a href="#features">Возможности</a>
+      <a href="#how-it-works">Как работает</a>
+      <a href="#tech">Технологии</a>
+      <a href="https://github.com/xleizulqrd" target="_blank" class="github-link">
+        <i class="bi bi-github"></i> GitHub
+      </a>
+      <a href="index.html" class="btn-primary"><i class="bi bi-cloud-upload"></i> Загрузить книгу</a>
+    </div>
+  </nav>
+
+  <main>
+    <!-- HERO с профессиональным текстом -->
+    <section class="hero">
+      <div class="container">
+        <h1>Интеллектуальный поиск <span>по текстовым массивам</span> с использованием LLM</h1>
+        <p class="subhead">Корпоративное решение для семантического анализа документов, извлечения знаний и ответов на вопросы на основе загруженных материалов. Серверная инфраструктура с предустановленными моделями ИИ.</p>
+        <div class="hero-buttons">
+          <a href="index.html" class="btn-primary" style="font-size:1rem; padding:0.8rem 2rem;"><i class="bi bi-rocket-takeoff"></i> Начать работу</a>
+          <a href="#how-it-works" class="btn-outline" style="font-size:1rem; padding:0.8rem 2rem;">Принцип работы</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES с более деловыми описаниями -->
+    <section id="features" class="section">
+      <div class="container">
+        <h2 class="section-title">Функциональные возможности</h2>
+        <p class="section-desc">Платформа обеспечивает полный цикл работы с текстовыми документами: от загрузки до интеллектуального анализа.</p>
+
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon"><i class="bi bi-file-text"></i></div>
+            <h3>Загрузка документов</h3>
+            <p>Поддержка текстовых форматов .txt. Документы хранятся в защищенном облачном хранилище с возможностью организации личной библиотеки.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon"><i class="bi bi-search-heart"></i></div>
+            <h3>Семантический поиск</h3>
+            <p>Векторный поиск по смыслу, а не по ключевым словам. Система находит релевантные фрагменты даже при отсутствии точных совпадений.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon"><i class="bi bi-chat-text"></i></div>
+            <h3>Генерация ответов</h3>
+            <p>Формирование связных ответов на естественном языке с опорой исключительно на загруженные документы (технология RAG).</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon"><i class="bi bi-quote"></i></div>
+            <h3>Верификация источников</h3>
+            <p>Каждый ответ сопровождается цитатами из исходных документов с точным указанием местоположения фрагмента.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon"><i class="bi bi-stars"></i></div>
+            <h3>Рекомендательная система</h3>
+            <p>Анализ пользовательских предпочтений и содержания библиотеки для формирования персонализированных рекомендаций.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon"><i class="bi bi-shield-check"></i></div>
+            <h3>Контроль достоверности</h3>
+            <p>При отсутствии информации в загруженных документах система информирует об этом, исключая генерацию неподтвержденных данных.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section id="how-it-works" class="section" style="background: #ffffff;">
+      <div class="container">
+        <h2 class="section-title">Принцип работы</h2>
+        <p class="section-desc">Архитектура RAG (Retrieval-Augmented Generation) в действии</p>
+
+        <div style="background: var(--primary-light); border-radius: var(--radius-xl); padding:2rem;">
+          <div style="display:flex; gap:2rem; flex-wrap:wrap; align-items: center;">
+            <div style="flex:1;">
+              <h3 style="font-size:1.8rem;">Ответ с подтверждением из первоисточника</h3>
+              <p style="color: var(--text);">На примере запроса <strong>«События с Наташей Ростовой в эпилоге»</strong> система демонстрирует извлечение релевантных фрагментов и генерацию ответа с указанием точных источников.</p>
+            </div>
+            <div style="background:white; border-radius: var(--radius-xl); padding:1.5rem; max-width:300px; border:1px solid var(--border);">
+              <i class="bi bi-chat-quote-fill" style="color: var(--primary);"></i>
+              <p style="font-family: 'Merriweather'; margin:0.5rem 0;">«В эпилоге Наташа представлена в браке с Пьером Безуховым, её образ трансформируется — акцент смещается на семейные отношения...»</p>
+              <hr style="border-top:1px dashed var(--border); margin:0.7rem 0;">
+              <div style="font-size:0.8rem;"><i class="bi bi-book"></i> Источник: Война и мир, эпилог, часть 1, глава 10</div>
+              <div style="font-size:0.8rem; margin-top:0.2rem;"><i class="bi bi-book"></i> Источник: Война и мир, эпилог, часть 1, глава 12</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Технологии -->
+    <section id="tech" class="section">
+      <div class="container">
+        <div style="display: flex; flex-wrap: wrap; gap: 3rem; align-items: center;">
+          <div style="flex: 1 1 300px;">
+            <h2 style="font-size: 2.2rem;">Технологический стек</h2>
+            <p style="color: var(--text-light); margin: 1.5rem 0; font-size:1.1rem;">Серверная инфраструктура включает компоненты для векторного поиска и генерации ответов. Все вычисления производятся на стороне сервера — клиенту требуется только браузер.</p>
+            <ul style="list-style: none;">
+              <li style="margin-bottom:0.75rem;"><i class="bi bi-check-circle-fill" style="color:var(--success); margin-right:0.75rem;"></i> Векторное представление текстов (sentence-transformers)</li>
+              <li style="margin-bottom:0.75rem;"><i class="bi bi-check-circle-fill" style="color:var(--success); margin-right:0.75rem;"></i> Поиск ближайших соседей в семантическом пространстве</li>
+              <li style="margin-bottom:0.75rem;"><i class="bi bi-check-circle-fill" style="color:var(--success); margin-right:0.75rem;"></i> Генеративная модель Ollama (LLaMA, Mistral)</li>
+              <li style="margin-bottom:0.75rem;"><i class="bi bi-check-circle-fill" style="color:var(--success); margin-right:0.75rem;"></i> Контекстное окно до 2048 токенов</li>
+            </ul>
+          </div>
+          <div style="flex: 1 1 300px; background: #1E293B; border-radius: var(--radius-2xl); padding: 2rem; color: white;">
+            <i class="bi bi-cpu" style="font-size:2.5rem; color: #94a3b8;"></i>
+            <p style="font-family: monospace; margin-top:1rem;">API запрос:<br/>>>> query: "эволюция образа Пьера Безухова"<br/>>>> retrieval: top-5 fragments<br/>>>> generation: context-aware response with citations</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="section">
+      <div class="container">
+        <div class="cta">
+          <h2>Начните использовать платформу</h2>
+          <p>Загрузите документы и протестируйте возможности семантического поиска и генерации ответов. Полная версия без ограничений.</p>
+          <a href="index.html" class="btn-cta"><i class="bi bi-arrow-right-circle"></i> Перейти в рабочее пространство</a>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer container">
+      <div>© 2026 BookHunter. Промышленное решение для анализа текстов.</div>
+      <div>
+        <a href="https://github.com/xleizulqrd"><i class="bi bi-github"></i></a>
+        <a href="#">Документация API</a>
+        <a href="#">Технические спецификации</a>
+      </div>
+    </footer>
+  </main>
+</body>
+</html>
